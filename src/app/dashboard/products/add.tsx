@@ -146,7 +146,7 @@ const AddProductModal = ({ isOpen, onClose, handleRefetch }: any) => {
                     <div className="mb-4">
                       <InputField
                         type="number"
-                        label={t('products.priceinUSD')}
+                        label="Selling price (RWF)"
                         placeholder={t('products.enterPrice')}
                         registration={register("price")}
                         error={errors.price?.message}

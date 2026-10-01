@@ -1,16 +1,14 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useRef } from "react";
-import { convertCurrency, formatCurrency } from "@/utils/formatCurrency";
+import { formatCurrency } from "@/utils/formatCurrency";
 import { useReactToPrint } from "react-to-print";
 import { useTranslation } from "react-i18next";
-import { useExchangeRate } from "@/hooks/api/exchangeRate";
 import { isLoggedIn } from "@/hooks/api/auth";
 import { CompanyLegalInfo } from "./campanyInfo";
 
 const ReceiptModal = ({ isOpen, onClose, order }: any) => {
   const printRef = useRef(null);
-  const currentCurrency: any = localStorage.getItem("selectedCurrency");
-  const { rate } = useExchangeRate();
+  
   const { t } = useTranslation();
   const user = isLoggedIn();
 
@@ -44,15 +42,7 @@ const ReceiptModal = ({ isOpen, onClose, order }: any) => {
   });
 
   // Convert amount based on currency
-  const convertAmount = (amount: number, currency: string) => {
-    console.log(currency);
-    console.log(amount);
-    if (currency === "USD") {
-      return `CDF${amount * rate}`;
-    } else {
-      return `$${(amount * rate) / rate}`;
-    }
-  };
+  const convertAmount = (amount: number) => formatCurrency(amount);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -133,13 +123,11 @@ const ReceiptModal = ({ isOpen, onClose, order }: any) => {
                         </td>
                         <td className="p-2 text-right">{product?.quantity}</td>
                         <td className="p-2 text-right">
-                          {formatCurrency(product?.price, rate)}
+                          {formatCurrency(product?.price)}
                         </td>
                         <td className="p-2 text-right">
                           {formatCurrency(
-                            product?.price * product?.quantity,
-                            rate
-                          )}
+                            product?.price * product?.quantity)}
                         </td>
                       </tr>
                     ))}
@@ -151,7 +139,7 @@ const ReceiptModal = ({ isOpen, onClose, order }: any) => {
                   <div className="flex justify-between text-xs">
                     <p className="  ">{t("receipt.subtotal")}:</p>
                     <p className="   ">
-                      {formatCurrency(order?.totalAmount, rate)}
+                      {formatCurrency(order?.totalAmount)}
                     </p>
                   </div>
                   <div className="flex justify-between text-xs">
@@ -164,18 +152,16 @@ const ReceiptModal = ({ isOpen, onClose, order }: any) => {
                   </div>
                   <div className="flex justify-between font-bold text-sm">
                     <p>{t("receipt.total")}:</p>
-                    <p>{formatCurrency(order?.totalAmount, rate)}</p>
+                    <p>{formatCurrency(order?.totalAmount)}</p>
                   </div>
 
                   {/* Amount in another currency */}
                   <div className="flex justify-between font-bold text-sm">
                     <p>
-                      {currentCurrency === "USD"
-                        ? t("receipt.amount") + " in CDF:"
-                        : t("receipt.amount") + " in USD:"}
+                      {t("receipt.amount") + " (RWF):"}
                     </p>
 
-                    <p>{convertAmount(order?.totalAmount, currentCurrency)}</p>
+                    <p>{convertAmount(order?.totalAmount)}</p>
                   </div>
                 </div>
 

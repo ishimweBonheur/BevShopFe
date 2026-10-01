@@ -1,6 +1,1 @@
-import React from 'react';
-const Footer = () => {
-    return <div className="dark:text-white-dark text-center ltr:sm:text-left rtl:sm:text-right p-6 pt-0 mt-auto">© {new Date().getFullYear()}.farm All rights reserved.</div>;
-};
-
-export default Footer;
+export default function Footer() { return <footer className="p-6 pt-0 mt-auto text-center text-gray-500 dark:text-white-dark print:hidden">© {new Date().getFullYear()} Beverage shop</footer>; }

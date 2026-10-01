@@ -28,7 +28,7 @@ export const useLogin = () => {
             toast.success('Login successful');
             return response.data;
         } catch (error: any) {
-            console.log(error)
+
             const errorMessage =
                 error.response?.data?.error ||
                 'An error occurred during login.';
@@ -48,103 +48,6 @@ export const useLogin = () => {
 };
 
 export const isLoggedIn = () => {
- 
-    const token = storage.getToken();
-    if (token) {
-        const decodedToken: any = jwt_decode(token);
-        const currentTime = Date.now() / 1000;
-
-        if (decodedToken.exp < currentTime) {
-            storage.removeToken();
-            localStorage.removeItem('Farm_user');
-            window.location.href = '/login';
-            return false;
-        }
-
-        const user = localStorage.getItem('Farm_user');
-        if (user) {
-            return JSON.parse(user);
-        }
-    }
-    return false;
+ try { const token=storage.getToken(); if(!token)return false; const decoded:any=jwt_decode(token); if(!decoded.exp || decoded.exp<Date.now()/1000){storage.removeToken();localStorage.removeItem('Farm_user');return false;} return JSON.parse(localStorage.getItem('Farm_user')||'false'); } catch {storage.removeToken();localStorage.removeItem('Farm_user');return false;}
 };
 
-
-
-export const useUsers = () => {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-
-    const fetchUsers = useCallback(async (query?: string) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await api.get(`/users${queryString(query)}`);
-            setUsers(response.data);
-        } catch (err: any) {
-            setError(err?.response?.data?.message ?? err ?? null);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    const addUser = async (user: any) => {
-        setLoading(true);
-        try {
-          await api.post('/users', user);
-          fetchUsers();
-          toast.success('User Created successfully');
-        } catch (error: any) {
-          if (error.response && error.response.status === 400) {
-            if (error.response.data.error) {
-              const errorMessage = error.response.data.error;
-              toast.error(errorMessage);
-            } else if (error.response.data.message === 'An account with this phone address already exists.') {
-              toast.error('An account with this phone number already exists.');
-            } else {
-              toast.error('Failed to create user. Please try again later.');
-            }
-          } else {
-            toast.error('An unexpected error occurred. Please try again later.');
-          }
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-    const updateUser = async (id: any, user: any) => {
-        setLoading(true);
-        try {
-            await api.put(`/users/${id}`, user);
-            toast.success('User Updated')
-            fetchUsers();
-        } catch (error:any) {
-            setError(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const deleteUser = async (id: any) => {
-        setLoading(true);
-        try {
-            await api.delete(`/users/${id}`);
-            fetchUsers();
-        } catch (error:any) {
-            setError(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return {
-        users,
-        loading,
-        error,
-        addUser,
-        updateUser,
-        deleteUser,
-        refetch: fetchUsers,
-    };
-};

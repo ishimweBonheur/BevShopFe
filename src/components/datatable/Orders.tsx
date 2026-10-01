@@ -9,7 +9,6 @@ import "jspdf-autotable";
 
 import { usePOS } from "@/hooks/api/sales";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { useExchangeRate } from "@/hooks/api/exchangeRate";
 
 export type TableColumnV2<Entry> = {
   title: string;
@@ -39,7 +38,6 @@ export default function DataTableOrders<Entry extends {}>(
   const PAGE_SIZES = [10, 20, 30, 50, 100, all];
 
   const { orders, loading, fetchOrders, cancelOrder } = usePOS();
-  const { rate } = useExchangeRate();
   useEffect(() => {
     fetchOrders("pageSize=1000000");
   }, [fetchOrders]);
@@ -130,7 +128,7 @@ export default function DataTableOrders<Entry extends {}>(
           row.invoiceNumber || "-",
           `${row.preparedBy?.firstName ?? "-"} ${row.preparedBy?.lastName ?? "-"}`,
           row.customer || "-",
-          formatCurrency(row.totalAmount, rate),
+          formatCurrency(row.totalAmount),
           `${row.discount ?? 0}%`,
           `${row.tax ?? 0}%`,
           row.status || "-",

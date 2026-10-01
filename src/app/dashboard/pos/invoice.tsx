@@ -3,13 +3,11 @@ import { Fragment, useRef } from "react";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { useReactToPrint } from "react-to-print";
 import { useTranslation } from "react-i18next";
-import { useExchangeRate } from "@/hooks/api/exchangeRate";
 import { isLoggedIn } from "@/hooks/api/auth";
 import src from "@/assets/logo2.jpg"
 import { CompanyLegalInfo } from "./campanyInfo";
 const InvoiceModal = ({ isOpen, onClose, order }: any) => {
   const printRef = useRef(null);
-  const { rate } = useExchangeRate();
   const { t } = useTranslation();
   const user = isLoggedIn();
 
@@ -17,16 +15,8 @@ const InvoiceModal = ({ isOpen, onClose, order }: any) => {
     content: () => printRef.current,
   });
 
-  const currentCurrency: any = localStorage.getItem("selectedCurrency");
-    const convertAmount = (amount: number, currency: string) => {
-      console.log(currency);
-      console.log(amount);
-      if (currency === "USD") {
-        return `CDF${amount * rate}`;
-      } else {
-        return `$${(amount * rate) / rate}`;
-      }
-    };
+  
+    const convertAmount = (amount: number) => formatCurrency(amount);
   
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -103,8 +93,8 @@ const InvoiceModal = ({ isOpen, onClose, order }: any) => {
                       <tr key={index} className="border-b border-gray-300">
                         <td className="p-2">{product.product.name} ({product.product.barcode})</td>
                         <td className="p-2 text-right">{product.quantity}</td>
-                        <td className="p-2 text-right">{formatCurrency(product.price, rate)}</td>
-                        <td className="p-2 text-right">{formatCurrency(product.price * product.quantity, rate)}</td>
+                        <td className="p-2 text-right">{formatCurrency(product.price)}</td>
+                        <td className="p-2 text-right">{formatCurrency(product.price * product.quantity)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -113,7 +103,7 @@ const InvoiceModal = ({ isOpen, onClose, order }: any) => {
                 <div className="my-4 border-t border-gray-300"></div>
                 <div className="flex justify-between mb-2">
                   <p className=" ">{t("invoice.subtotal")}:</p>
-                  <p className="    ">{formatCurrency(order.totalAmount, rate)}</p>
+                  <p className="    ">{formatCurrency(order.totalAmount)}</p>
                 </div>
                 <div className="flex justify-between mb-2">
                   <p className=" ">{t("invoice.discount")}:</p>
@@ -125,16 +115,14 @@ const InvoiceModal = ({ isOpen, onClose, order }: any) => {
                 </div>
                 <div className="flex justify-between font-bold text-lg">
                   <p>{t("invoice.total")}:</p>
-                  <p>{formatCurrency(order.totalAmount, rate)}</p>
+                  <p>{formatCurrency(order.totalAmount)}</p>
                 </div>
                 <div className="flex justify-between font-bold text-sm">
                     <p>
-                      {currentCurrency === "USD"
-                        ? t("receipt.amount") + " in CDF:"
-                        : t("receipt.amount") + " in USD:"}
+                      {t("receipt.amount") + " (RWF):"}
                     </p>
 
-                    <p>{convertAmount(order?.totalAmount, currentCurrency)}</p>
+                    <p>{convertAmount(order?.totalAmount)}</p>
                   </div>
                 <div>
                   <p className="text-center text-sm     mt-4">{t("invoice.thankYouMessage")}</p>

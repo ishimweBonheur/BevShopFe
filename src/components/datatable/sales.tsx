@@ -9,7 +9,6 @@ import "jspdf-autotable";
 
 import { usePOS } from "@/hooks/api/sales";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { useExchangeRate } from "@/hooks/api/exchangeRate";
 import { useSales } from "@/hooks/api/payments";
 
 export type TableColumnV2<Entry> = {
@@ -40,7 +39,6 @@ export default function DataTableSales<Entry extends {}>(
   const PAGE_SIZES = [10, 20, 30, 50, 100, all];
 
   const { sales, loading, fetchSales,  } = useSales();
-  const { rate } = useExchangeRate();
   useEffect(() => {
     fetchSales("pageSize=1000000");
   }, [fetchSales]);
@@ -121,7 +119,7 @@ export default function DataTableSales<Entry extends {}>(
     const tableRows = sales?.list?.map((row: any, index: number) => { // Adding index for numbering
       const orderItems = row.order.products
         ? row.order.products
-            .map((item: any) => `${item.product.name} (${item.quantity} x ${formatCurrency(item.price, rate)})`)
+            .map((item: any) => `${item.product.name} (${item.quantity} x ${formatCurrency(item.price)})`)
             .join(", ")
         : "-";
   
@@ -129,9 +127,9 @@ export default function DataTableSales<Entry extends {}>(
         index + 1, // Adding the row number (index + 1 for 1-based numbering)
         row.order.invoiceNumber || "-",
         row.order.customer || "-",
-        formatCurrency(row.order.totalAmount, rate),
-        formatCurrency(row.amountPaid, rate),
-        formatCurrency(row.remainingAmount, rate),
+        formatCurrency(row.order.totalAmount),
+        formatCurrency(row.amountPaid),
+        formatCurrency(row.remainingAmount),
         row.paymentMethod || "-",
         row.status || "-",
         formatDateToLongForm(row.createdAt),

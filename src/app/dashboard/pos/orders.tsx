@@ -6,7 +6,6 @@ import { usePOS } from "@/hooks/api/sales";
 import { Link, useSearchParams } from "react-router-dom";
 import ConfirmDeleteModal from "./cancel";
 import InvoiceModal from "./invoice";
-import { useExchangeRate } from "@/hooks/api/exchangeRate";
 import { useTranslation } from "react-i18next";
 import formatDateToLongForm from "@/utils/DateFormattter";
 import { useProducts } from "@/hooks/api/products";
@@ -17,7 +16,6 @@ import DataTableOrders from "@/components/datatable/Orders";
 
 const Orders = () => {
   const { t } = useTranslation();
-  const { rate } = useExchangeRate();
   const { orders, loading, fetchOrders, cancelOrder } = usePOS();
   const [searchParams, setSearchParams] = useSearchParams();
   const { register, setValue, handleSubmit } = useForm();
@@ -83,7 +81,7 @@ const Orders = () => {
     {
       title: t("orders.totalAmount"),
       accessor: "totalAmount",
-      render: (row) => <p>{formatCurrency(row.totalAmount, rate)}</p>,
+      render: (row) => <p>{formatCurrency(row.totalAmount)}</p>,
     },
     {
       title: t("orders.discount"),
@@ -129,7 +127,7 @@ const Orders = () => {
               </p>
               <p>
                 <strong>{t("orders.price")}:</strong>{" "}
-                {formatCurrency(item.price, rate)}
+                {formatCurrency(item.price)}
               </p>
             </div>
           ))}
