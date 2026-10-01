@@ -12,11 +12,8 @@ export function Field({ label, name, type = 'text', value, optional = false, ste
     step?: string;
 }) {
     const id = useId();
-    return <div><label htmlFor={id}>{label}</label><input id={id} className="form-input" name={name} type={type} defaultValue={value} required={!optional} step={step || (type === 'number' ? '0.000001' : undefined)} min={type === 'number' ? '0' : undefined}/></div>;
-}
-export function Payment() {
-    const id = useId();
-    return <div><label htmlFor={id}>Payment method</label><select id={id} className="form-select" name="paymentMethod"><option value="cash">Cash</option><option value="mobile_money">Mobile money</option><option value="card">Card</option></select></div>;
+    const shown = value === undefined || value === null || value === '' ? undefined : type === 'number' ? String(Number(value)) : value;
+    return <div><label htmlFor={id}>{label}</label><input id={id} className="form-input min-h-[44px] text-base" name={name} type={type} defaultValue={shown} required={!optional} step={step || (type === 'number' ? '0.01' : undefined)} min={type === 'number' ? '0' : undefined}/></div>;
 }
 export function Table({ headers, children }: {
     headers: string[];

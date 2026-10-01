@@ -2,7 +2,7 @@
 import { storage } from '@/utils';
 import axios from 'axios';
 
-const configuredServerUrl = process.env.REACT_APP_SERVER_URL || 'bev-shop-be.vercel.app';
+const configuredServerUrl = process.env.REACT_APP_SERVER_URL || 'https://bev-shop-be.vercel.app';
 
 // Accept either a server URL or a URL that already ends in `/api` without
 // accidentally requesting `/api/api/...`.

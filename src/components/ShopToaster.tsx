@@ -1,0 +1,5 @@
+import {Portal} from '@headlessui/react';
+import toast,{Toaster,ToastBar} from 'react-hot-toast';
+export default function ShopToaster(){return <Portal><Toaster position="top-right" gutter={10} containerStyle={{top:20,right:16,left:16,zIndex:2000}} toastOptions={{duration:4500,style:{maxWidth:400,padding:'14px 16px',borderRadius:14,background:'#fff',color:'#172033',boxShadow:'0 8px 30px #17203320',border:'1px solid #e2e8f0'},success:{duration:3500,iconTheme:{primary:'#15803d',secondary:'#fff'}},error:{duration:6500,iconTheme:{primary:'#b91c1c',secondary:'#fff'},ariaProps:{role:'alert','aria-live':'assertive'}}}}>{t=><ToastBar toast={{...t,ariaProps:{role:t.type==='error'?'alert':'status','aria-live':t.type==='error'?'assertive':'polite'}}}>{({icon,message})=><>{icon}<div className="min-w-0 flex-1">{message}</div><button type="button" aria-label="Dismiss notification" onClick={()=>toast.dismiss(t.id)} className="ml-2 rounded p-2 text-gray-500 hover:bg-gray-100 focus:ring-2 focus:ring-primary">×</button></>}</ToastBar>}</Toaster></Portal>;}
+
+

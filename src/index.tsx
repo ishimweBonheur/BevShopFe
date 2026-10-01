@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ErrorBoundary } from 'react-error-boundary';  
 import App from "./App";
 import "./tailwind.css";
-import { Toaster } from "react-hot-toast";
+import ShopToaster from "./components/ShopToaster";
 import { store } from "./store";
 import Error500 from "@/errors/500Error";
 import { I18nextProvider } from "react-i18next";
@@ -24,7 +24,7 @@ function AppProvider(props: AppProviderProps) {
         <Provider store={store}>
           <BrowserRouter>
             <ErrorBoundary FallbackComponent={Error500}>
-              <Toaster position='top-center' reverseOrder={false} />
+              <ShopToaster />
               {children}
             </ErrorBoundary>
           </BrowserRouter>

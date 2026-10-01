@@ -14,8 +14,7 @@ import Dropdown from "@/components/dropdown";
 import { storage } from "@/utils";
 import { isLoggedIn } from "@/hooks/api/auth";
 import IconMenu from "../Icon/IconMenu";
-import LanguageSwitcher from "./language";
-import { useInventory } from '@/core/provider/InventoryProvider';
+import { useNotebook } from '@/core/provider/NotebookProvider';
 const Header = () => {
     const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
@@ -36,7 +35,7 @@ const Header = () => {
         }
     }, [navigate]);
     const user = isLoggedIn();
-    const { settings } = useInventory();
+    const { user: owner } = useNotebook();
     const Logout = () => {
         storage.removeToken();
         localStorage.removeItem("Farm_user");
@@ -49,6 +48,7 @@ const Header = () => {
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: "Africa/Kigali",
         hour12: false, // 24-hour format
     }).format(currentDate).replace(",", " at");
     return (<header className={`print:hidden z-40 ${themeConfig.semidark && themeConfig.menu === "horizontal" ? "dark" : ""}`}>
@@ -93,7 +93,7 @@ const Header = () => {
                       <img className="h-10 w-10 rounded-md object-cover" src={profile} alt="userProfile"/>
                       <div className="truncate ltr:pl-4 rtl:pr-4">
                         <h4 className="text-base">
-                          {user?.username || t("header.user")}
+                          {owner?.name || user?.name || user?.username || t("header.user")}
                           <span className="rounded bg-success-light px-1 text-xs text-success ltr:ml-2 rtl:ml-2">
                             Owner
                           </span>
@@ -110,11 +110,8 @@ const Header = () => {
                       {t("header.profile")}
                     </Link>
                   </li>
-                  <li className="hover:bg-gray-100">
-                    <LanguageSwitcher />
-                  </li>
                   <li className="hover:bg-gray-100 mt-2">
-                    <span className="px-4">RWF</span>
+                    <span className="px-4">RWF · Kigali</span>
                   </li>
                   <li className="border-t border-white-light dark:border-white-light/10">
                     <button onClick={Logout} className="flex flex-row !py-3 text-danger">

@@ -63,7 +63,7 @@ module.exports = {
                 },
             },
             fontFamily: {
-                outfit: "Outfit",
+                outfit: ["Outfit", "ui-sans-serif", "system-ui", "sans-serif"],
             },
 
             spacing: {
