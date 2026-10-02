@@ -1,9 +1,0 @@
-.env
-node_modules
-backups/
-*.bevbackup
-.neon
-artifacts/
-*.log
-.env.local
-.env.*.local
