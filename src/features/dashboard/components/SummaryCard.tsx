@@ -5,6 +5,7 @@ interface SummaryCardProps {
   value: string
   icon: LucideIcon
   tone?: 'blue' | 'green' | 'amber' | 'red' | 'slate'
+  valueClassName?: string
   className?: string
   onClick?: () => void
 }
@@ -23,6 +24,7 @@ export function SummaryCard({
   icon: Icon,
   tone = 'slate',
   className = '',
+  valueClassName = 'text-ink',
   onClick,
 }: SummaryCardProps) {
   const cardClasses = `rounded-2xl border border-line bg-surface p-4 shadow-sm ${className}`
@@ -44,7 +46,7 @@ export function SummaryCard({
           </div>
         </div>
 
-        <p className="mt-5 text-2xl font-semibold tracking-tight text-ink">
+        <p className={`mt-5 text-2xl font-semibold tracking-tight ${valueClassName}`}>
           {value}
         </p>
       </button>
@@ -62,7 +64,7 @@ export function SummaryCard({
         </div>
       </div>
 
-      <p className="mt-5 text-2xl font-semibold tracking-tight text-ink">
+      <p className={`mt-5 text-2xl font-semibold tracking-tight ${valueClassName}`}>
         {value}
       </p>
     </div>

@@ -35,5 +35,9 @@ export function periodDates(period: string): [string, string] {
     date.setUTCMonth(0)
     date.setUTCDate(1)
   }
-  return [date.toISOString().slice(0, 10), end]
+  const last = new Date(date)
+  if (period === 'week') last.setUTCDate(last.getUTCDate() + 6)
+  if (period === 'month') { last.setUTCMonth(last.getUTCMonth() + 1); last.setUTCDate(0) }
+  if (period === 'year') { last.setUTCFullYear(last.getUTCFullYear() + 1); last.setUTCDate(0) }
+  return [date.toISOString().slice(0, 10), last.toISOString().slice(0, 10)]
 }

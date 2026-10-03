@@ -1,4 +1,6 @@
 ﻿import { useState } from 'react'
+import { toast } from 'sonner'
+import { summaryRows, stockRows, paymentRows, resultClass, resultLabel, reportPeriod } from './presentation'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient, list } from '../../lib/apiClient'
 import { useList } from '../../lib/queries'
@@ -13,16 +15,16 @@ import {
   Table,
 } from '../../components/ui'
 import type { Product } from '../products/types'
-import type { RecordRow } from '../records/RecordsPage'
 import { TransactionDetail } from '../transactions/TransactionsPage'
 import {
   historyLabels,
   type HistoryItem,
   type Report,
-  type Summary,
+  type PrintableReport,
 } from './types'
 export function ReportsPage() {
   const [period, setPeriod] = useState('today')
+  const [generating, setGenerating] = useState(false)
   const [from, setFrom] = useState(today())
   const [to, setTo] = useState(today())
   const dates = period === 'custom' ? [from, to] : periodDates(period)
@@ -34,12 +36,22 @@ export function ReportsPage() {
     enabled: valid,
   })
   const summary = useQuery({
-    queryKey: ['reports', 'summary', params],
-    queryFn: () => apiClient<Summary>(`/reports/summary?${params}`),
+    queryKey: ['reports', 'print', params],
+    queryFn: () => apiClient<PrintableReport>(`/reports/print?${params}`),
     enabled: valid,
   })
   const products = useList<Product>('products')
-  const s = summary.data
+  const s = summary.data?.summary
+  async function downloadPDF() {
+    if (!summary.data || generating) return
+    setGenerating(true)
+    try {
+      const { downloadReportPDF } = await import('./pdf')
+      await downloadReportPDF(summary.data, period)
+    } catch {
+      toast.error('Could not generate the report PDF. Please try again.')
+    } finally { setGenerating(false) }
+  }
   return (
     <div className="space-y-6">
       <PageHeading title="Reports" />
@@ -51,7 +63,7 @@ export function ReportsPage() {
               ['week', 'This Week'],
               ['month', 'This Month'],
               ['year', 'This Year'],
-              ['custom', 'Custom'],
+              ['custom', 'Custom Date Range'],
             ].map(([v, l]) => (
               <option key={v} value={v}>
                 {l}
@@ -80,6 +92,12 @@ export function ReportsPage() {
           </>
         )}
       </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <button className="btn" onClick={() => void downloadPDF()} disabled={!valid || !summary.data || summary.isFetching || !!summary.error || generating}>
+          {generating ? 'Generating PDF...' : 'Download PDF'}
+        </button>
+        <span className="muted text-sm">A4 report with the full business history.</span>
+      </div>
       {!valid ? (
         <p role="alert">Choose a valid date range.</p>
       ) : report.isPending || summary.isPending ? (
@@ -98,23 +116,31 @@ export function ReportsPage() {
           <>
             <h2>Business Summary</h2>
             <div className="summary-grid">
-              {[
-                ['Sales', formatRWF(s.sales_revenue)],
-                ['Purchases', formatRWF(s.purchases)],
-                ['Expenses', formatRWF(s.expenses)],
-                [
-                  s.profit_loss >= 0 ? 'Profit' : 'Loss',
-                  formatRWF(Math.abs(s.profit_loss)),
-                ],
-                ['Damaged Loss', formatRWF(s.damaged_loss)],
-                ['Items Sold', s.items_sold.toLocaleString()],
-              ].map(([label, value]) => (
+              {summaryRows(s).map(([label, value]) => (
                 <div className="panel" key={label}>
                   <p className="muted">{label}</p>
-                  <p className="total">{value}</p>
+                  <p className={`total ${label === resultLabel(s.profit_loss) ? resultClass(s.profit_loss) : ''}`}>{value}</p>
                 </div>
               ))}
             </div>
+            <p className="muted">{summary.data && reportPeriod(summary.data, period)} ? Generated {dateTime(summary.data?.generated_at)}</p>
+            <h2>Stock Summary</h2>
+            <div className="summary-grid">{stockRows(s).map(([label, value]) => <div className="panel" key={label}><p className="muted">{label}</p><p className="total">{value}</p></div>)}</div>
+            <p className="muted">Stock counts are current. Low stock includes out-of-stock products.</p>
+            <h2>Payment Summary</h2>
+            <Table rows={paymentRows(s)} rowKey={r => r[0]} columns={[{label: 'Payment Method', render: r => r[0]}, {label: 'Amount', render: r => r[1]}]} />
+            {period === 'year' && <><h2>Monthly Summary</h2><Table rows={summary.data?.monthly ?? []} rowKey={r => r.month} columns={[
+              {label: 'Month', render: r => r.month}, {label: 'Sales', render: r => formatRWF(r.summary.sales_revenue)},
+              {label: 'Expenses', render: r => formatRWF(r.summary.expenses)}, {label: 'Damaged Loss', render: r => formatRWF(r.summary.damaged_loss)},
+              {label: 'Profit / Loss', render: r => <span className={resultClass(r.summary.profit_loss)}>{resultLabel(r.summary.profit_loss)}: {formatRWF(Math.abs(r.summary.profit_loss))}</span>},
+            ]} /></>}
+            <h2>Full Business History</h2>
+            <Table rows={summary.data?.history ?? []} rowKey={r => r.type + r.id} empty="No activity in this period." columns={[
+              {label: 'Date', render: r => dateTime(r.date)}, {label: 'Type', render: r => historyLabels[r.type] ?? r.type},
+              {label: 'Item / Description', render: r => r.description}, {label: 'Category', render: r => r.category || '?'},
+              {label: 'Quantity', render: r => r.quantity ?? '?'}, {label: 'Amount', render: r => formatRWF(r.amount)}, {label: 'Details', render: r => r.details || '?'},
+            ]} />
+            <div className="panel"><h2>FINAL RESULT</h2><p className={`total ${resultClass(s.profit_loss)}`}>{resultLabel(s.profit_loss)}: {formatRWF(Math.abs(s.profit_loss))}</p><p className="muted">Sales ? Cost of Items Sold ? Expenses ? Damaged Loss = Profit / Loss</p></div>
             <h2>Best-Selling Products</h2>
             <Table
               rows={report.data.top_products ?? []}
@@ -183,23 +209,7 @@ export function HistoryPage() {
     queryFn: () => list<HistoryItem>(`/history?${params}`),
     enabled: valid,
   })
-  const owner = useList<RecordRow>('owner-money')
-  const ownerRows: HistoryItem[] = (owner.data ?? [])
-    .filter((r) => {
-      const date = new Date(r.entry_date!).getTime()
-      return (
-        date >= new Date(`${from}T00:00:00+02:00`).getTime() &&
-        date < new Date(dateQuery(from, to).get('to')!).getTime()
-      )
-    })
-    .map((r) => ({
-      id: r.id,
-      type: r.type!,
-      date: r.entry_date!,
-      description: r.notes || historyLabels[r.type!],
-      amount: r.amount!,
-    }))
-  const rows = [...(query.data ?? []), ...ownerRows]
+  const rows = [...(query.data ?? [])]
     .filter((r) => !type || r.type === type)
     .sort((a, b) => b.date.localeCompare(a.date))
   return (
@@ -241,14 +251,13 @@ export function HistoryPage() {
       </div>
       {!valid ? (
         <p role="alert">Choose a valid date range.</p>
-      ) : query.isPending || owner.isPending ? (
+      ) : query.isPending ? (
         <Skeleton />
-      ) : query.error || owner.error ? (
+      ) : query.error ? (
         <ErrorState
-          error={query.error ?? owner.error}
+          error={query.error}
           retry={() => {
             void query.refetch()
-            void owner.refetch()
           }}
         />
       ) : (

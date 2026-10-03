@@ -65,7 +65,7 @@ export function DashboardPage() {
   }
 
   const profitIsPositive = data.today_profit_loss >= 0
-  const profitTitle = profitIsPositive ? "Today's Profit" : "Today's Loss"
+  const profitTitle = data.today_profit_loss > 0 ? 'Profit' : data.today_profit_loss < 0 ? 'Loss' : 'No Profit / Loss'
   const profitValue = profitIsPositive
     ? formatRWF(data.today_profit_loss)
     : formatRWF(Math.abs(data.today_profit_loss))
@@ -109,13 +109,16 @@ export function DashboardPage() {
           title={profitTitle}
           value={data.today_profit_loss === 0 ? 'RWF 0' : profitValue}
           icon={profitIsPositive ? ArrowUpCircle : ArrowDownCircle}
-          tone={profitIsPositive ? 'green' : 'red'}
+          tone={data.today_profit_loss === 0 ? 'slate' : profitIsPositive ? 'green' : 'red'}
+          valueClassName={data.today_profit_loss > 0 ? 'text-success' : data.today_profit_loss < 0 ? 'text-danger' : 'text-ink'}
         />
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <SummaryCard title="Today's Damaged Loss" value={formatRWF(data.today_damaged_loss)} icon={AlertTriangle} tone="red" />
+        <SummaryCard title="Items Sold" value={(data.items_sold ?? 0).toLocaleString()} icon={ShoppingCart} />
         <SummaryCard
-          title="Items in Stock"
+          title="Current Stock"
           value={data.current_stock.toLocaleString()}
           icon={Boxes}
           tone="slate"

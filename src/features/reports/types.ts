@@ -1,4 +1,11 @@
 export type Summary = {
+  cost_of_items_sold: number
+  items_purchased: number
+  damaged_items: number
+  out_of_stock_count: number
+  cash: number
+  mobile_money: number
+  bank: number
   sales_revenue: number
   purchases: number
   expenses: number
@@ -27,6 +34,9 @@ export type HistoryItem = {
   date: string
   description: string
   amount: number
+  category?: string
+  quantity?: number | null
+  details?: string
   reference_id?: string
 }
 export const historyLabels: Record<string, string> = {
@@ -36,4 +46,13 @@ export const historyLabels: Record<string, string> = {
   damage: 'Damaged',
   money_added: 'Money Added',
   money_taken: 'Money Taken',
+}
+
+export type PrintableReport = {
+ title: string
+ period: { from: string; to: string }
+ generated_at: string
+ summary: Summary
+ history: HistoryItem[]
+ monthly: { month: string; summary: Summary }[]
 }

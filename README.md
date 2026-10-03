@@ -57,3 +57,35 @@ npm.cmd run test:browser
 ```
 
 Set `FRONTEND_URL` for a different frontend address. The suite checks all 12 business routes at 320, 375, 768, 1024 and 1440 pixels, navigation, authenticated redirects, transaction forms, stock limits, friendly errors, receipts, record forms and profile actions.
+
+## Downloadable business reports
+
+On Reports, choose Today, This Week, This Month, This Year, or Custom Date Range,
+then click **Download PDF**. The screen and PDF use the same `/api/v1/reports/print`
+response. Totals are calculated by PostgreSQL/backend code, not from table rows.
+The backend returns the full history without a pagination limit in a read-only
+snapshot. Reports include stock/payment totals, all six activity types, and a
+monthly summary for yearly reports. Stock counts reflect current inventory.
+
+Downloads use structured data with jsPDF and AutoTable (no screenshots), A4 portrait,
+repeating table headers, wrapped details, page numbers, and current global theme
+colors. Positive, negative and zero results have explicit labels for monochrome
+printing. RWF formatting preserves up to two decimal places throughout the app.
+
+### Reporting verification
+
+Run the backend's `scripts/verify-reports.mjs` against a fresh isolated backend on
+port 18082 with `TEST_API_URL=http://localhost:18082`. It creates test business
+records and saves a fixture in the OS temporary directory. Then, with the frontend
+running on 5174:
+
+```powershell
+node scripts/verify-report-pdf.mjs
+```
+
+The PDF check routes browser reads to that isolated backend, checks every supported
+period, opens the actual downloads with PDF.js, verifies totals and complete
+history, checks A4 page bounds and headers, and tests result colors and error UI.
+It writes sample PDFs to the OS temporary directory under `bevshop-pdf-verification`.
+The ordinary regression suite remains `npm run test:browser` (set `FRONTEND_URL`
+if your development server uses a different port).

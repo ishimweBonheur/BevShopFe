@@ -14,6 +14,7 @@ import { apiClient, list } from '../../lib/apiClient'
 import { formatRWF } from '../../lib/currency'
 import { dateTime } from '../../lib/period'
 import type { Product } from '../products/types'
+
 export type TransactionItem = {
   id: string
   product_name: string
@@ -27,6 +28,7 @@ export type TransactionItem = {
   price_per_item: number
   total_cost: number
 }
+
 export type Transaction = {
   id: string
   purchase_date?: string
@@ -37,11 +39,13 @@ export type Transaction = {
   notes: string
   items: TransactionItem[] | null
 }
+
 const paymentLabels: Record<string, string> = {
   cash: 'Cash',
   mobile_money: 'Mobile Money',
   bank: 'Bank',
 }
+
 export function TransactionDetail({
   resource,
   id,
@@ -57,6 +61,7 @@ export function TransactionDetail({
   })
   const sale = resource === 'sales'
   const data = query.data
+
   return (
     <Modal title={sale ? 'Sale Receipt' : 'Purchase Details'} onClose={onClose}>
       {query.isPending ? (
@@ -129,13 +134,16 @@ export function TransactionDetail({
     </Modal>
   )
 }
+
 type Line = { key: string; product_id: string; count: number; price: number }
+
 const newLine = (): Line => ({
   key: crypto.randomUUID(),
   product_id: '',
   count: 1,
   price: 0,
 })
+
 function TransactionForm({
   resource,
   onClose,
@@ -151,12 +159,14 @@ function TransactionForm({
   const [lines, setLines] = useState<Line[]>([newLine()])
   const [validation, setValidation] = useState<Error | null>(null)
   const save = useSave<Transaction>(resource, onSaved)
+
   function update(key: string, value: Partial<Line>) {
     setLines((old) =>
       old.map((line) => (line.key === key ? { ...line, ...value } : line)),
     )
     setValidation(null)
   }
+
   return (
     <Modal
       title={sale ? 'Record Sale' : 'Record Purchase'}
@@ -343,6 +353,7 @@ function TransactionForm({
     </Modal>
   )
 }
+
 export function TransactionsPage({
   resource,
 }: {
@@ -357,6 +368,7 @@ export function TransactionsPage({
     queryFn: () =>
       list<Transaction>(`/${resource}?limit=15&offset=${page * 15}`),
   })
+
   return (
     <div className="space-y-6">
       <PageHeading
@@ -383,6 +395,20 @@ export function TransactionsPage({
                 label: 'Date',
                 render: (r) => dateTime(r.sale_date ?? r.purchase_date),
               },
+              {
+                label: 'Products',
+                render: (r: Transaction) =>
+                  r.items && r.items.length > 0 ? (
+                    r.items.map((i) => i.product_name).join(', ')
+                  ) : (
+                    <button
+                      className="text-link"
+                      onClick={() => setView(r.id)}
+                    >
+                      View items
+                    </button>
+                  ),
+              },
               ...(sale
                 ? [
                     {
@@ -398,14 +424,6 @@ export function TransactionsPage({
                       render: (r: Transaction) => r.supplier_name,
                     },
                   ]),
-              ...(!sale
-                ? [
-                    {
-                      label: 'Products',
-                      render: (r: Transaction) => r.items?.length ?? '—',
-                    },
-                  ]
-                : []),
               {
                 label: sale ? 'Items Sold' : 'Items Received',
                 render: (r) =>
@@ -415,9 +433,7 @@ export function TransactionsPage({
                       0,
                     )
                   ) : (
-                    <button className="text-link" onClick={() => setView(r.id)}>
-                      View items
-                    </button>
+                    '—'
                   ),
               },
               { label: 'Total', render: (r) => formatRWF(r.total_amount) },

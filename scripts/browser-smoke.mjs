@@ -25,6 +25,7 @@ const product = {
   is_active: true,
 }
 const summary = {
+  cost_of_items_sold: 1700, items_purchased: 12, damaged_items: 1, out_of_stock_count: 0, cash: 2000, mobile_money: 0, bank: 0,
   sales_revenue: 2000,
   purchases: 12000,
   expenses: 500,
@@ -99,6 +100,7 @@ await page.route('**/api/v1/**', async (route) => {
   if (resource === 'auth') return send(user)
   assert.equal(request.headers().authorization, 'Bearer test-token')
   if (path === 'reports/summary') return send(summary)
+  if (path === 'reports/print') return send({title:'Test report',period:{from:now,to:now},generated_at:now,summary,history:[],monthly:[]})
   if (path === 'reports/dashboard')
     return send({
       summary,
@@ -115,6 +117,7 @@ await page.route('**/api/v1/**', async (route) => {
     })
   if (path === 'history')
     return send([
+      ...(db['owner-money'] ?? []).map(r => ({id:r.id,type:r.type,date:r.entry_date,description:r.notes,amount:r.amount})),
       {
         id: 't1',
         type: 'sale',
@@ -169,7 +172,7 @@ try {
   await page.getByLabel('Password', { exact: true }).fill('password123')
   await click('Sign in')
   await page.waitForURL('**/dashboard')
-  await page.getByText("Today's Loss", { exact: true }).waitFor()
+  await page.getByText('Loss', { exact: true }).waitFor()
   assert.equal(
     await page
       .locator('.sidebar')

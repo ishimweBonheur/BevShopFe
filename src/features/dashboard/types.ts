@@ -21,6 +21,8 @@ export interface DashboardResponse {
   today_sales: number
   today_purchases: number
   today_expenses: number
+  today_damaged_loss: number
+  items_sold: number
   today_profit_loss: number
   current_stock: number
   low_stock_count: number
