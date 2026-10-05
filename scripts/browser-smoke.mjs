@@ -219,12 +219,34 @@ try {
         ),
         `${route} overflows at ${width}`,
       )
+      if (width < 768) {
+        assert.ok(
+          await page.evaluate(() => {
+            const header = document.querySelector('.app-header')
+            const main = document.querySelector('.page-content')
+            return getComputedStyle(header).position === 'fixed' &&
+              main.getBoundingClientRect().top >= header.getBoundingClientRect().bottom
+          }),
+          `${route} content overlaps the fixed header at ${width}`,
+        )
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+        assert.equal(
+          await page.locator('.app-header').evaluate(el => el.getBoundingClientRect().top),
+          0,
+          `${route} header moves while scrolling at ${width}`,
+        )
+      }
     }
     if (width < 768) {
       await click('Open menu')
       assert.equal(
         await page.locator('.mobile-drawer').evaluate((el) => el.open),
         true,
+      )
+      assert.equal(
+        await page.locator('body').evaluate(el => getComputedStyle(el).overflow),
+        'hidden',
+        'Opening the mobile menu must lock background scrolling',
       )
       await page
         .locator('.mobile-drawer')
