@@ -9,7 +9,6 @@ import {
   Package,
   ReceiptText,
   ShieldAlert,
-  Store,
   TrendingUp,
   Truck,
   UserCircle,
@@ -34,17 +33,13 @@ function Navigation({ close }: { close?: () => void }) {
   return (
     <>
       <div className="brand">
-        <Store aria-hidden="true" />
-        <div>
-          <strong>BevShop</strong>
-          <small>Shop owner</small>
-        </div>
-        {close && (
-          <button onClick={close} aria-label="Close menu">
-            <X />
-          </button>
-        )}
-      </div>
+  <img src="/modern.png" alt="BevShop logo" width="24" height="24" />
+  {close && (
+    <button onClick={close} aria-label="Close menu">
+      <X />
+    </button>
+  )}
+</div>
       <nav aria-label="Main navigation">
         {navItems.map(({ label, to, icon: Icon }) => (
           <NavLink
