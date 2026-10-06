@@ -1,0 +1,4 @@
+Generator: built-in image_gen
+Asset: public/bevshop-logo-dark.png
+
+Use case: logo-brand. Create a polished horizontal transparent PNG logo for BevShop, a beverage shop management app. Designed to display at 180px width on a dark navy #0f172a sidebar. Exact and only text: "BevShop", large bold clean rounded sans-serif, Bev in near-white #f8fafc and Shop in bright sky blue #38bdf8. Simple compact beverage bottle/storefront symbol at left using white and bright sky blue, strong silhouettes, minimal detail, consistent thick strokes. Flat crisp professional design, extremely readable at small sizes. Horizontal tightly framed lockup approximately 4:1 with minimal transparent padding. Actual transparent alpha background. No background panel, no dark lettering, no tagline, no shadows, no gradients, no mockup, no extra text.

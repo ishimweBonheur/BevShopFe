@@ -32,14 +32,14 @@ const navItems = [
 function Navigation({ close }: { close?: () => void }) {
   return (
     <>
-      <div className="brand">
-  <img src="/modern.png" alt="BevShop logo" width="24" height="24" />
-  {close && (
-    <button onClick={close} aria-label="Close menu">
-      <X />
-    </button>
-  )}
-</div>
+      <div className="flex items-center gap-3 p-6">
+        <img className="h-auto w-[180px] min-w-0" src="/bevshop-logo-dark.png" alt="BevShop logo" />
+        {close && (
+          <button className="ml-auto shrink-0" onClick={close} aria-label="Close menu">
+            <X />
+          </button>
+        )}
+      </div>
       <nav aria-label="Main navigation">
         {navItems.map(({ label, to, icon: Icon }) => (
           <NavLink
